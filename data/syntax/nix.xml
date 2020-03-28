@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE language SYSTEM "language.dtd"
+[
+<!ENTITY identifier "[a-zA-Z][a-zA-Z0-9\-_']*">
+]>
+
+<!--
+  Author: Anders Lund <anders@alweb.dk>
+  Minor changes: Joseph Wenninger <jowenn@kde.org>
+  Full JavaScript 1.0 support by Whitehawk Stormchaser
+
+  Last Update: Nov. 20, 2019 (Version 14)
+
+  IMPORTANT: This syntax highlighting definition depends on
+  JavaScript React (JSX), TypeScript and QML.
+-->
+<language name="Nix" version="14" kateversion="5.0" section="Scripts" extensions="*.nix"
+          indenter="cstyle" priority="1"
+          author="Dawid Sowa (dawid_sowa@posteo.net)" license="">
+
+  <highlighting>
+    <list name="keywords">
+
+    </list>
+    <list name="primitives">
+      <item>false</item>
+      <item>null</item>
+      <item>true</item>
+    </list>
+    <contexts>
+        <context name="Normal" lineEndContext="#stay" attribute="Error">
+          <DetectChar char="{"       context="AttrSet" beginRegion="AttrSet" attribute="Separator_Pair" />
+          <WordDetect attribute="Keyword" context="Let" String="let" beginRegion="Let"/>
+          <DetectSpaces context="#stay" attribute="Normal" />
+      </context>
+      <context name="Set" attribute="Error">
+        <DetectChar attribute="SingleLineComment" context="singleLineComment" char="#"/>
+        <Detect2Chars context="multiLineComment" char="/" char1="*" />
+        <RegExpr String="&identifier;" attribute="Key"/>
+        <RangeDetect char="&quot;" char1="&quot;" attribute="KeyString"/>
+        <DetectChar char="." attribute="Separator_Pair" />
+        <DetectChar char="="       context="Value" attribute="Separator_Pair" />
+        <DetectSpaces context="#stay" attribute="Normal" />
+      </context>
+      <context name="AttrSet" lineEndContext="#stay" attribute="Error">
+        <IncludeRules context="Set" includeAttrib="true"/>
+        <DetectChar char="}"       context="#pop" endRegion="AttrSet" attribute="Separator_Pair" />
+      </context>
+      <context name="With" lineEndContext="#stay" attribute="Error">
+        <RegExpr String="&identifier;" attribute="Key"/>
+        <DetectChar char="." attribute="Separator_Pair" />
+        <DetectChar char=";"       context="#pop" attribute="Separator_Pair" />
+        <DetectSpaces context="#stay" attribute="Normal" />
+      </context>
+      <context attribute="Error" lineEndContext="#stay" name="Value" >
+        <RegExpr String="&identifier;:" attribute="Function"/>
+        <AnyChar attribute="Operator" String="-?*/+!&lt;&gt;" context="#stay"/>
+        <WordDetect String="with" context="With" attribute="Keyword"/>
+        <keyword attribute="Keyword" context="#stay" String="primitives" />
+        
+        <Float attribute="Floating"/>
+        <Int attribute="Decimal"/>
+        <WordDetect attribute="Keyword" context="Let" String="let" beginRegion="Let"/>
+        <RegExpr String="&identifier;" attribute="Normal"/>
+        <DetectChar char="(" attribute="Normal" />
+        <DetectChar char=")" attribute="Normal" />
+        <DetectChar char="." attribute="Separator_Pair" />
+        <DetectChar attribute="SingleLineComment" context="singleLineComment" char="#"/>
+        <Detect2Chars context="multiLineComment" char="/" char1="*" />
+        <DetectChar attribute="Separator_Pair" context="AttrSet" char="{" beginRegion="AttrSet"/>
+
+        <DetectChar attribute="Separator_List" context="List" char="[" beginRegion="List"/>
+        <DetectChar context="string" char="&quot;" />
+        <Detect2Chars context="indentedString" char="'" char1="'" />
+        <DetectChar char=";"       context="#pop" attribute="Separator_Pair" />
+        <DetectSpaces context="#stay" attribute="Normal" />
+      </context>
+      <context name="Let" >
+        <WordDetect attribute="Keyword" context="#pop" String="in" endRegion="Let"/>
+        <IncludeRules context="Set" includeAttrib="true"/>
+        <WordDetect attribute="Keyword" context="#pop" String="in" endRegion="Let"/>
+      </context>
+      <context attribute="Error" lineEndContext="#stay" name="List" >
+        <RegExpr String="&identifier;" attribute="Normal"/>
+        <DetectChar char="." attribute="Separator_Pair" />
+        <DetectChar attribute="SingleLineComment" context="singleLineComment" char="#"/>
+        <Detect2Chars context="multiLineComment" char="/" char1="*" />
+        <DetectChar attribute="Separator_Pair" context="AttrSet" char="{" beginRegion="AttrSet"/>
+        <DetectChar attribute="Separator_List" context="List" char="[" beginRegion="List"/>
+        <keyword attribute="Keyword" context="#stay" String="primitives" />
+        <DetectChar context="string" char="&quot;" />
+        <Float attribute="Floating"/>
+        <Int attribute="Decimal"/>
+        <Detect2Chars context="indentedString" char="'" char1="'" />
+        <DetectChar char="]"       context="#pop" attribute="Separator_List" endRegion="List"/>
+        <DetectSpaces context="#stay" attribute="Normal" />
+      </context>
+      <context attribute="String" lineEndContext="#stay" name="string" >
+        <Detect2Chars attribute="Separator_Pair" context="Antiquotation" char="$" char1="{"/>
+        <Detect2Chars char="\" char1="&quot;" />
+        <DetectChar attribute="String" context="#pop" char="&quot;" />
+      </context>
+      <context attribute="Indented String" lineEndContext="#stay" name="indentedString" >
+        <StringDetect String="''${"/>
+        <Detect2Chars attribute="Separator_Pair" context="Antiquotation" char="$" char1="{"/>
+        <Detect2Chars attribute="Indented String" context="#pop" char="'" char1="'" />
+      </context>
+      <context lineEndContext="#stay" name="Antiquotation" >
+        <IncludeRules context="Value" includeAttrib="true"/>
+        <DetectChar attribute="Separator_Pair" context="#pop" char="}"/>
+      </context>
+      <context attribute="SingleLineComment" lineEndContext="#pop" name="singleLineComment"/>
+      <context attribute="MultiLineComment" name="multiLineComment">
+        <Detect2Chars context="#pop" char="*" char1="/" />Logical implication
+      </context>
+    </contexts>
+    <itemDatas>
+      <itemData name="Normal"             defStyleNum="dsNormal" />
+      <itemData name="Error" defStyleNum="dsError"/>
+      <itemData name="Function" defStyleNum="dsFunction" />
+      <itemData name="Separator_Pair" defStyleNum="dsOthers" bold="true" />
+      <itemData name="Separator_List" defStyleNum="dsOthers" bold="true" />
+      <itemData name="Normal Text" defStyleNum="dsNormal" />
+      <itemData name="Keyword" defStyleNum="dsKeyword" />
+      <itemData name="Operator" defStyleNum="dsOperator" />
+      <itemData name="String" defStyleNum="dsString" />
+      <itemData name="KeyString" defStyleNum="dsString" />
+      <itemData name="Decimal" defStyleNum="dsDecVal" />
+      <itemData name="Floating" defStyleNum="dsFloat" />
+      <itemData name="Key" defStyleNum="dsVariable" />
+      <itemData name="SingleLineComment"      defStyleNum="dsComment" />
+      <itemData name="MultiLineComment"      defStyleNum="dsComment" />
+      <itemData name="Indented String" defStyleNum="dsString" />
+    </itemDatas>
+  </highlighting>
+
+  <general>
+    <comments>
+      <comment name="singleLine" start="#" />
+      <comment name="multiLine" start="/*" end="*/" region="Comment" />
+    </comments>
+    <keywords casesensitive="1" />
+  </general>
+
+</language>
+
+<!-- kate: space-indent on; indent-width 2; -->
